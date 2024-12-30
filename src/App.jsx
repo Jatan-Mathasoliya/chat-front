@@ -16,8 +16,6 @@ function App() {
         <Route path="/signup" element={<Signup />} />
         <Route path="/login" element={<Login />} />
         <Route path="/chat" element={<Chat />} />
-        {/* Fallback route */}
-        <Route path="*" element={<Home />} />
       </Routes>
     </Router>
   );
