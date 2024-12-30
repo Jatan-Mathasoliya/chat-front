@@ -1,42 +1,46 @@
 import React, { useState } from "react";
+import axios from "axios";
+import { useNavigate } from "react-router-dom";
 
 const Signup = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
+  const navigate = useNavigate();
 
-  const handleSubmit = async (e) => {
+  const handleSignup = async (e) => {
     e.preventDefault();
-    const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/api/signup`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ email, password }),
-    });
 
-    const data = await response.json();
-    if (response.ok) {
-      alert("Signup successful!");
-    } else {
-      alert(data.message);
+    try {
+      const res = await axios.post("https://chat-backend-7jiw.onrender.com/api/signup", { email, password });
+      if (res.status === 201) {
+        navigate("/login");
+      }
+    } catch (err) {
+      setError("Signup failed. Please try again.");
     }
   };
 
   return (
-    <form onSubmit={handleSubmit}>
+    <div>
       <h2>Signup</h2>
-      <input
-        type="email"
-        placeholder="Email"
-        value={email}
-        onChange={(e) => setEmail(e.target.value)}
-      />
-      <input
-        type="password"
-        placeholder="Password"
-        value={password}
-        onChange={(e) => setPassword(e.target.value)}
-      />
-      <button type="submit">Signup</button>
-    </form>
+      <form onSubmit={handleSignup}>
+        <input
+          type="email"
+          placeholder="Email"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+        />
+        <input
+          type="password"
+          placeholder="Password"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+        />
+        <button type="submit">Signup</button>
+      </form>
+      {error && <p>{error}</p>}
+    </div>
   );
 };
 
