@@ -1,3 +1,4 @@
+// src/components/Login.jsx
 import React, { useState } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
@@ -14,8 +15,11 @@ const Login = () => {
     try {
       const res = await axios.post(`${import.meta.env.VITE_BACKEND_URL}/api/login`, { email, password });
       if (res.status === 200) {
+        // Store token and userId in localStorage
         localStorage.setItem("token", res.data.token); // Save JWT
         localStorage.setItem("userId", res.data.userId); // Save user ID
+
+        // Redirect to chat page after login
         navigate("/chat");
       }
     } catch (err) {

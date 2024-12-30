@@ -1,3 +1,4 @@
+// src/components/Signup.jsx
 import React, { useState } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
@@ -14,6 +15,7 @@ const Signup = () => {
     try {
       const res = await axios.post(`${import.meta.env.VITE_BACKEND_URL}/api/signup`, { email, password });
       if (res.status === 201) {
+        // After successful signup, navigate to login
         navigate("/login");
       }
     } catch (err) {
