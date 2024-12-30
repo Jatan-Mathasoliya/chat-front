@@ -12,7 +12,7 @@ const Signup = () => {
     e.preventDefault();
 
     try {
-      const res = await axios.post("https://blink-chat-s3qg.onrender.com/api/signup", { email, password });
+      const res = await axios.post(`${import.meta.env.VITE_BACKEND_URL}/api/signup`, { email, password });
       if (res.status === 201) {
         navigate("/login");
       }

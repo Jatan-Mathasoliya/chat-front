@@ -12,7 +12,7 @@ const Login = () => {
     e.preventDefault();
 
     try {
-      const res = await axios.post("https://chat-backend-7jiw.onrender.com/api/login", { email, password });
+      const res = await axios.post(`${import.meta.env.VITE_BACKEND_URL}/api/login`, { email, password });
       if (res.status === 200) {
         localStorage.setItem("token", res.data.token); // Save JWT
         localStorage.setItem("userId", res.data.userId); // Save user ID

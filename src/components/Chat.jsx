@@ -23,7 +23,7 @@ const Chat = () => {
 
     // Fetch users
     axios
-      .get("https://chat-backend-7jiw.onrender.com/api/users")
+      .get(`${import.meta.env.VITE_BACKEND_URL}/api/users`)
       .then((res) => setUsers(res.data))
       .catch((err) => console.log(err));
 
@@ -35,7 +35,7 @@ const Chat = () => {
     if (selectedUser) {
       // Fetch messages
       axios
-        .get(`https://chat-backend-7jiw.onrender.com/api/messages/${userId}/${selectedUser._id}`)
+        .get(`${import.meta.env.VITE_BACKEND_URL}/api/messages/${userId}/${selectedUser._id}`)
         .then((res) => setMessages(res.data))
         .catch((err) => console.log(err));
     }
@@ -52,7 +52,7 @@ const Chat = () => {
   const sendMessage = () => {
     const message = { sender: userId, receiver: selectedUser._id, content: newMessage };
     socket.emit("send-message", message);
-    axios.post("https://chat-backend-7jiw.onrender.com/api/messages", message);
+    axios.post(`${import.meta.env.VITE_BACKEND_URL}/api/messages`, message);
     setMessages((prev) => [...prev, message]);
     setNewMessage("");
   };
