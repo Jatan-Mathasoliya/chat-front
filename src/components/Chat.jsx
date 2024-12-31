@@ -1,95 +1,93 @@
-import React, { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import React, { useState, useEffect } from "react";
 import { io } from "socket.io-client";
-import axios from "axios";
 
-const socket = io("http://localhost:5000");
+const socket = io("https://chat-backend-7jiw.onrender.com"); // Replace with your server's URL
 
-const Chat = () => {
-  const navigate = useNavigate();
-  const [users, setUsers] = useState([]);
-  const [selectedUser, setSelectedUser] = useState(null);
+function ChatPage() {
+  const [message, setMessage] = useState("");
   const [messages, setMessages] = useState([]);
-  const [newMessage, setNewMessage] = useState("");
-
-  const userId = localStorage.getItem("userId");
-  const token = localStorage.getItem("token");
+  const [room, setRoom] = useState("");
 
   useEffect(() => {
-    // Redirect to login if not authenticated
-    if (!token) {
-      navigate("/login");
-    }
-
-    // Fetch users
-    axios
-      .get(`${import.meta.env.VITE_BACKEND_URL}/api/users`)
-      .then((res) => setUsers(res.data))
-      .catch((err) => console.log(err));
-
-    // Join user's room
-    socket.emit("join", userId);
-  }, [navigate, token, userId]);
-
-  useEffect(() => {
-    if (selectedUser) {
-      // Fetch messages
-      axios
-        .get(`${import.meta.env.VITE_BACKEND_URL}/api/messages/${userId}/${selectedUser._id}`)
-        .then((res) => setMessages(res.data))
-        .catch((err) => console.log(err));
-    }
-  }, [selectedUser, userId]);
-
-  useEffect(() => {
-    socket.on("receive-message", (message) => {
-      if (message.sender === selectedUser?._id) {
-        setMessages((prev) => [...prev, message]);
-      }
+    // Listen for incoming messages
+    socket.on("receive-message", (newMessage) => {
+      setMessages((prevMessages) => [
+        ...prevMessages,
+        `${newMessage.sender || "Someone"}: ${newMessage.content}`,
+      ]);
     });
-  }, [selectedUser]);
 
-  const sendMessage = () => {
-    const message = { sender: userId, receiver: selectedUser._id, content: newMessage };
-    socket.emit("send-message", message);
-    axios.post(`${import.meta.env.VITE_BACKEND_URL}/api/messages`, message);
-    setMessages((prev) => [...prev, message]);
-    setNewMessage("");
+    return () => {
+      // Clean up socket connection on component unmount
+      socket.off("receive-message");
+    };
+  }, []);
+
+  const handleSendMessage = () => {
+    if (!message.trim()) return;
+
+    const messageData = {
+      sender: "You", // Replace this with the actual user info in a real app
+      content: message,
+      room,
+    };
+
+    // Send message to server
+    socket.emit("send-message", messageData);
+
+    // Add your own message to the chat
+    setMessages((prevMessages) => [...prevMessages, `You: ${message}`]);
+    setMessage(""); // Clear input
+  };
+
+  const handleJoinRoom = () => {
+    if (room.trim()) {
+      socket.emit("join-room", room);
+      alert(`You joined room: ${room}`);
+    } else {
+      alert("Please enter a room name.");
+    }
   };
 
   return (
-    <div>
-      <h2>Welcome to the Chat</h2>
-      <div>
-        <h3>Users</h3>
-        {users.map((user) => (
-          <div key={user._id} onClick={() => setSelectedUser(user)}>
-            {user.email}
-          </div>
-        ))}
+    <div style={{ padding: "20px" }}>
+      <h1>Chat Page</h1>
+      <div style={{ marginBottom: "20px" }}>
+        <input
+          type="text"
+          placeholder="Enter room name (optional)"
+          value={room}
+          onChange={(e) => setRoom(e.target.value)}
+          style={{ marginRight: "10px", padding: "5px" }}
+        />
+        <button onClick={handleJoinRoom} style={{ padding: "5px 10px" }}>
+          Join Room
+        </button>
+      </div>
+      <div style={{ marginBottom: "20px" }}>
+        <input
+          type="text"
+          placeholder="Type your message"
+          value={message}
+          onChange={(e) => setMessage(e.target.value)}
+          style={{ marginRight: "10px", padding: "5px" }}
+        />
+        <button onClick={handleSendMessage} style={{ padding: "5px 10px" }}>
+          Send
+        </button>
       </div>
       <div>
-        <h3>Chat</h3>
-        {selectedUser ? (
-          <div>
-            {messages.map((msg, idx) => (
-              <div key={idx}>
-                {msg.sender === userId ? `You: ${msg.content}` : `Friend: ${msg.content}`}
-              </div>
-            ))}
-            <input
-              type="text"
-              value={newMessage}
-              onChange={(e) => setNewMessage(e.target.value)}
-            />
-            <button onClick={sendMessage}>Send</button>
-          </div>
-        ) : (
-          <p>Select a user to start chatting</p>
-        )}
+        <h3>Messages:</h3>
+        <ul style={{ listStyleType: "none", padding: 0 }}>
+          {messages.map((msg, index) => (
+            <li key={index} style={{ margin: "5px 0" }}>
+              {msg}
+            </li>
+          ))}
+        </ul>
       </div>
     </div>
   );
-};
+}
 
-export default Chat;
+export default ChatPage;
