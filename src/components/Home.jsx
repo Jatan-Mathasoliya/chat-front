@@ -6,12 +6,12 @@ const Home = () => {
   const navigate = useNavigate();
   const token = localStorage.getItem("token");
 
-  useEffect(() => {
-    // If the user is already logged in, redirect to the chat page
-    if (token) {
-      navigate("/chat");
-    }
-  }, [token, navigate]);
+  // useEffect(() => {
+  //   // If the user is already logged in, redirect to the chat page
+  //   if (token) {
+  //     navigate("/chat");
+  //   }
+  // }, [token, navigate]);
 
   const handleSignup = () => {
     navigate("/signup");
